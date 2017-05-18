@@ -21,18 +21,7 @@
 
 #### Android
 
-1. Open up `android/app/src/main/java/[...]/MainActivity.java`
-  - Add `import com.reactlibrary.RNReactNativeSharingWinstagramPackage;` to the imports at the top of the file
-  - Add `new RNReactNativeSharingWinstagramPackage()` to the list returned by the `getPackages()` method
-2. Append the following lines to `android/settings.gradle`:
-  	```
-  	include ':react-native-sharing-winstagram'
-  	project(':react-native-sharing-winstagram').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-sharing-winstagram/android')
-  	```
-3. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
-  	```
-      compile project(':react-native-react-native-sharing-winstagram')
-  	```
+To be implemented.
 
 ## Usage
 ```javascript
@@ -44,5 +33,5 @@ if (RNReactNativeSharingWinstagram.canShareToInstagram) {
 }
 
 // Share regular Text with Url
-RNReactNativeSharingWinstagram.shareText('Check this out!', 'https://docs.npmjs.com');
+RNReactNativeSharingWinstagram.shareText('Check this out!', 'https://github.com/nascimentorafael/react-native-sharing-winstagram');
 ```
