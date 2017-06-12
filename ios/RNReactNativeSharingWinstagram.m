@@ -12,9 +12,6 @@
 
 @implementation RNReactNativeSharingWinstagram
 
-NSString* const kInstagramAppURLString = @"instagram://app";
-NSString* const kInstagramOnlyPhotoFileName = @"tempinstgramphoto.igo";
-
 @synthesize bridge = _bridge;
 
 - (dispatch_queue_t)methodQueue {
@@ -23,16 +20,16 @@ NSString* const kInstagramOnlyPhotoFileName = @"tempinstgramphoto.igo";
 
 RCT_EXPORT_MODULE()
 
-RCT_EXPORT_METHOD(shareImage:(NSString *)image Url(NSString *)url andCopy(NSString *)copy) {
+RCT_EXPORT_METHOD(shareImage:(NSString *)base64String copy:(NSString *)copy andUrl:(NSString *)url) {
     
     UIImage *image = [UIImage imageWithData: [[NSData alloc]initWithBase64EncodedString:base64String options:NSDataBase64DecodingIgnoreUnknownCharacters]];
     
     if (!image) {
         return;
     }
-
+    
     AQSInstagramActivity *activity = [[AQSInstagramActivity alloc] init];
-    NSArray *items = @[[[NSURL alloc]initWithString:url],copy, image];
+    NSArray *items = @[copy, [[NSURL alloc]initWithString:url], image];
     
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:items applicationActivities:@[activity]];
     

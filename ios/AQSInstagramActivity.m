@@ -2,6 +2,8 @@
 //  AQSInstagramActivity.m
 //  AQSInstagramActivity
 //
+//  Created by Rafael Nascimento on 16/05/17.
+//  Copyright © 2017 nascimentorafael. All rights reserved.
 //
 
 #import "AQSInstagramActivity.h"
@@ -29,16 +31,12 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
     return UIActivityCategoryShare;
 }
 
-- (NSString *)activityType {
-    return @"org.openaquamarine.instagram";
-}
-
 - (NSString *)activityTitle {
     return @"Instagram";
 }
 
 - (UIImage *)activityImage {
-    return [UIImage imageNamed:[NSString stringWithFormat:@"color_%@", NSStringFromClass([self class])]];
+    return [UIImage imageNamed:[NSString stringWithFormat:@"Instagram_icon"]];
 }
 
 - (BOOL)canPerformWithActivityItems:(NSArray *)activityItems {
@@ -46,8 +44,29 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
 }
 
 - (void)performActivity {
+    PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
+    if (status == PHAuthorizationStatusAuthorized || status == PHAuthorizationStatusDenied) {
+        [self savePicAndOpenInstagram];
+    }
+    else if (status == PHAuthorizationStatusNotDetermined) {
+        [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+            if (status == PHAuthorizationStatusAuthorized) {
+                [self savePicAndOpenInstagram];
+            }
+        }];
+    }
+}
+
+# pragma mark - Helpers (Instagram)
+
+- (BOOL)isInstagramInstalled {
+    return [[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:kAQSInstagramURLScheme]];
+}
+
+- (void)savePicAndOpenInstagram {
     UIImage *image = [self nilOrFirstImageFromArray:_activityItems];
     NSURL *URL = [self nilOrFileURLWithImageDataTemporary:UIImageJPEGRepresentation(image, 0.9)];
+    
     __block PHAssetChangeRequest *_mChangeRequest = nil;
     __block PHObjectPlaceholder *placeholder;
     
@@ -76,16 +95,10 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
     }];
 }
 
-# pragma mark - Helpers (Instagram)
-
-- (BOOL)isInstagramInstalled {
-    return [[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:kAQSInstagramURLScheme]];
-}
-
 # pragma mark - Helpers (UIDocumentInteractionController)
 
 - (NSURL *)nilOrFileURLWithImageDataTemporary:(NSData *)data {
-    NSString *writePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"instagram.igo"];
+    NSString *writePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"instagram.ig"];
     if (![data writeToFile:writePath atomically:YES]) {
         [self activityDidFinish:NO];
         return nil;
@@ -101,9 +114,6 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
         textOrNil = @"";
     }
     controller.delegate = self;
-    [controller setAnnotation:@{
-                                @"InstagramCaption": textOrNil
-                                }];
     return controller;
 }
 
