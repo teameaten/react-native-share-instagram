@@ -8,6 +8,7 @@
 
 #import "RNReactNativeSharingWinstagram.h"
 #import "RCTBridge.h"
+#import "AQSInstagramActivity.h"
 
 @implementation RNReactNativeSharingWinstagram
 
@@ -22,57 +23,23 @@ NSString* const kInstagramOnlyPhotoFileName = @"tempinstgramphoto.igo";
 
 RCT_EXPORT_MODULE()
 
-- (NSDictionary *)constantsToExport {
-    NSURL *appURL = [NSURL URLWithString:kInstagramAppURLString];
-    return @{
-             @"canShareToInstagram": [[UIApplication sharedApplication] canOpenURL:appURL] ? @(NO) : @(YES)
-             };
-}
-
-RCT_EXPORT_METHOD(shareToInstagramImageEndodedWith:(NSString *)base64String) {
-    NSString *photoFilePath = [NSString stringWithFormat:@"%@/%@",[NSHomeDirectory() stringByAppendingPathComponent:@"Documents"],kInstagramOnlyPhotoFileName];
+RCT_EXPORT_METHOD(shareImage:(NSString *)image Url(NSString *)url andCopy(NSString *)copy) {
     
     UIImage *image = [UIImage imageWithData: [[NSData alloc]initWithBase64EncodedString:base64String options:NSDataBase64DecodingIgnoreUnknownCharacters]];
     
     if (!image) {
         return;
     }
-    
-    [UIImageJPEGRepresentation(image, 1.0) writeToFile:photoFilePath atomically:YES];
-    
-    NSURL *fileURL = [NSURL fileURLWithPath:photoFilePath];
-    self.documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:fileURL];
-    self.documentInteractionController.delegate = self;
-    self.documentInteractionController.UTI = @"com.instagram.exclusivegram";
-    
-    UIViewController *ctrl = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
-    
-    [self.documentInteractionController presentOpenInMenuFromRect:ctrl.view.bounds inView:ctrl.view animated:YES];
-}
 
-RCT_EXPORT_METHOD(shareText:(NSString *)text withUrl:(NSString *)url) {
-    NSString *textToShare = text;
-    NSURL *urlToShare = [NSURL URLWithString:url];
+    AQSInstagramActivity *activity = [[AQSInstagramActivity alloc] init];
+    NSArray *items = @[[[NSURL alloc]initWithString:url],copy, image];
     
-    NSArray *objectsToShare = @[textToShare, urlToShare];
+    UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:items applicationActivities:@[activity]];
     
-    UIActivityViewController *activityVC = [[UIActivityViewController alloc] initWithActivityItems:objectsToShare applicationActivities:nil];
+    UIViewController *rootController = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
     
-    NSArray *excludeActivities = @[UIActivityTypeAirDrop,
-                                   UIActivityTypePrint,
-                                   UIActivityTypeAssignToContact,
-                                   UIActivityTypeSaveToCameraRoll,
-                                   UIActivityTypeAddToReadingList,
-                                   UIActivityTypePostToFlickr,
-                                   UIActivityTypePostToVimeo];
-    activityVC.excludedActivityTypes = excludeActivities;
+    [rootController presentViewController:activityController animated:YES completion:NULL];
     
-    UIViewController *ctrl = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
-    [ctrl presentViewController:activityVC animated:YES completion:nil];
-}
-
-- (UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller {
-    return self;
 }
 
 @end
