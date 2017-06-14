@@ -27,11 +27,7 @@ To be implemented.
 ```javascript
 import RNReactNativeSharingWinstagram from 'react-native-sharing-winstagram';
 
-// Share image to Instagram
-if (RNReactNativeSharingWinstagram.canShareToInstagram) {
-  RNReactNativeSharingWinstagram.shareToInstagramImageEndodedWith(base64String);
-}
+RNReactNativeSharingWinstagram.shareImage(base64Str, text, url);
 
-// Share regular Text with Url
-RNReactNativeSharingWinstagram.shareText('Check this out!', 'https://github.com/nascimentorafael/react-native-sharing-winstagram');
+ 'https://github.com/nascimentorafael/react-native-sharing-winstagram');
 ```
