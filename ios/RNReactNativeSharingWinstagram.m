@@ -32,6 +32,7 @@ RCT_EXPORT_METHOD(shareImage:(NSString *)base64String copy:(NSString *)copy andU
     NSArray *items = @[copy, [[NSURL alloc]initWithString:url], image];
     
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:items applicationActivities:@[activity]];
+    activityController.excludedActivityTypes = @[UIActivityTypeAssignToContact, UIActivityTypePrint, UIActivityTypeAddToReadingList, UIActivityTypeCopyToPasteboard, UIActivityTypeOpenInIBooks];
     
     UIViewController *rootController = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
     
