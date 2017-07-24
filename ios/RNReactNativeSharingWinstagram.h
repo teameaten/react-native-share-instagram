@@ -12,4 +12,6 @@
 
 @interface RNReactNativeSharingWinstagram : NSObject <RCTBridgeModule>
 
+@property (retain) UIDocumentInteractionController * documentInteractionController;
+
 @end
