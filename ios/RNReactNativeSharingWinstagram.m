@@ -7,28 +7,99 @@
 //
 
 #import "RNReactNativeSharingWinstagram.h"
+
 #import "RCTBridge.h"
 #import "AQSInstagramActivity.h"
 #import <Social/Social.h>
 #import <Accounts/Accounts.h>
+@import Photos;
 
 NSString *const kAQSInstagramURLScheme = @"instagram://app";
 NSString *const kAQSWhatsappURLScheme = @"whatsapp://app";
-
-@interface RNReactNativeSharingWinstagram () <UIDocumentInteractionControllerDelegate>
-
-@property (nonatomic, strong) NSArray *activityItems;
-@property (nonatomic, strong) UIDocumentInteractionController *controller;
-@property (nonatomic, assign) BOOL isPerformed;
-
-@end
 
 @implementation RNReactNativeSharingWinstagram
 
 @synthesize bridge = _bridge;
 
+RCT_EXPORT_MODULE()
+
 - (dispatch_queue_t)methodQueue {
     return dispatch_get_main_queue();
+}
+
+- (NSDictionary *)constantsToExport {
+    return @{
+             @"isInstagramInstalled":[[UIApplication sharedApplication] canOpenURL: [NSURL URLWithString: kAQSInstagramURLScheme]] ? @(YES) : @(NO),
+             @"isWhatsapppInstalled":[[UIApplication sharedApplication] canOpenURL: [NSURL URLWithString:kAQSWhatsappURLScheme]] ? @(YES) : @(NO),
+             @"isTwitterInstalled": [SLComposeViewController isAvailableForServiceType:SLServiceTypeTwitter] ? @(YES) : @(NO),
+             @"isFacebookInstalled":[SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook] ? @(YES) : @(NO)
+             };
+}
+
+
+RCT_EXPORT_METHOD(share:(NSString *)base64Image copy:(NSString *)copy andUrl:(NSString *)url) {
+    
+    UIImage *image = [UIImage imageWithData: [[NSData alloc]initWithBase64EncodedString:base64Image options:NSDataBase64DecodingIgnoreUnknownCharacters]];
+    
+    if (!image) {
+        return;
+    }
+    
+    AQSInstagramActivity *activity = [[AQSInstagramActivity alloc] init];
+    NSArray *items = @[copy, [[NSURL alloc]initWithString:url], image];
+    
+    UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:items applicationActivities:@[activity]];
+    activityController.excludedActivityTypes = @[UIActivityTypeAssignToContact, UIActivityTypePrint, UIActivityTypeAddToReadingList, UIActivityTypeCopyToPasteboard, UIActivityTypeOpenInIBooks];
+    
+    UIViewController *rootController = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+    [rootController presentViewController:activityController animated:YES completion:NULL];
+    
+}
+
+RCT_EXPORT_METHOD(shareOnInstagram:(NSString *)base64Image) {
+    if ([[UIApplication sharedApplication] canOpenURL: [NSURL URLWithString:kAQSInstagramURLScheme]]) {
+        PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
+        if (status == PHAuthorizationStatusAuthorized || status == PHAuthorizationStatusDenied) {
+            [self savePicAndOpenInstagram: base64Image];
+        }
+        else if (status == PHAuthorizationStatusNotDetermined) {
+            [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+                if (status == PHAuthorizationStatusAuthorized) {
+                    [self savePicAndOpenInstagram: base64Image];
+                }
+            }];
+        }
+    }
+}
+
+RCT_EXPORT_METHOD(shareOnWhatsapp:(NSString *)copy andUrl:(NSString *)url) {
+    if ([[UIApplication sharedApplication] canOpenURL: [NSURL URLWithString:kAQSWhatsappURLScheme]]) {
+        copy = [copy stringByAppendingString:@" "];
+        copy = [copy stringByAppendingString:url];
+        copy = [copy stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
+        NSURL *whatsappURL = [NSURL URLWithString:[NSString stringWithFormat:@"whatsapp://send?text=%@", copy]];
+        [[UIApplication sharedApplication] openURL:whatsappURL options:@{} completionHandler:nil];
+    }
+}
+
+RCT_EXPORT_METHOD(shareOnFacebook:(NSString *)copy andUrl:(NSString *)url) {
+    if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook]) {
+        SLComposeViewController *fbPostSheet = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeFacebook];
+        [fbPostSheet setInitialText:copy];
+        [fbPostSheet addURL:[NSURL URLWithString:url]];
+        UIViewController *rootController = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+        [rootController presentViewController:fbPostSheet animated:YES completion:NULL];
+    }
+}
+
+RCT_EXPORT_METHOD(shareOnTwitter:(NSString *)copy andUrl:(NSString *)url) {
+    if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeTwitter]) {
+        SLComposeViewController *twPostSheet = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeTwitter];
+        [twPostSheet setInitialText:copy];
+        [twPostSheet addURL:[NSURL URLWithString:url]];
+        UIViewController *rootController = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+        [rootController presentViewController:twPostSheet animated:YES completion:NULL];
+    }
 }
 
 -(void)savePicAndOpenInstagram:(NSString*)base64Image {
@@ -55,7 +126,6 @@ NSString *const kAQSWhatsappURLScheme = @"whatsapp://app";
     } completionHandler:^(BOOL success, NSError *error) {
         
         if (success) {
-            
             NSURL *instagramURL = [NSURL URLWithString:[NSString stringWithFormat:@"instagram://library?LocalIdentifier=\%@", [placeholder localIdentifier]]];
             
             if ([[UIApplication sharedApplication] canOpenURL:instagramURL]) {
@@ -87,87 +157,6 @@ NSString *const kAQSWhatsappURLScheme = @"whatsapp://app";
     }
     controller.delegate = self;
     return controller;
-}
-
-
-RCT_EXPORT_MODULE()
-
-- (NSDictionary *)constantsToExport
-{
-    return @{
-             @"isInstagramInstalled":[[UIApplication sharedApplication] canOpenURL: kAQSInstagramURLScheme] ? @(YES) : @(NO),
-             @"isWhatsapppInstalled":[[UIApplication sharedApplication] canOpenURL: kAQSWhatsappURLScheme] ? @(YES) : @(NO),
-             @"isTwitterInstalled": [SLComposeViewController isAvailableForServiceType:SLServiceTypeTwitter] ? @(YES) : @(NO),
-             @"isFacebookInstalled":[SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook] ? @(YES) : @(NO),
-             };
-}
-
-
-RCT_EXPORT_METHOD(share:(NSString *)base64Image copy:(NSString *)copy andUrl:(NSString *)url) {
-    
-    UIImage *image = [UIImage imageWithData: [[NSData alloc]initWithBase64EncodedString:base64Image options:NSDataBase64DecodingIgnoreUnknownCharacters]];
-    
-    if (!image) {
-        return;
-    }
-    
-    AQSInstagramActivity *activity = [[AQSInstagramActivity alloc] init];
-    NSArray *items = @[copy, [[NSURL alloc]initWithString:url], image];
-    
-    UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:items applicationActivities:@[activity]];
-    activityController.excludedActivityTypes = @[UIActivityTypeAssignToContact, UIActivityTypePrint, UIActivityTypeAddToReadingList, UIActivityTypeCopyToPasteboard, UIActivityTypeOpenInIBooks];
-    
-    UIViewController *rootController = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
-    
-    [rootController presentViewController:activityController animated:YES completion:NULL];
-    
-}
-
-RCT_EXPORT_METHOD(shareOnInstagram:(NSString *)base64Image) {
-    if ([[UIApplication sharedApplication] canOpenURL: kAQSInstagramURLScheme]) {
-        PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
-        if (status == PHAuthorizationStatusAuthorized || status == PHAuthorizationStatusDenied) {
-            [self savePicAndOpenInstagram: base64Image];
-        }
-        else if (status == PHAuthorizationStatusNotDetermined) {
-            [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
-                if (status == PHAuthorizationStatusAuthorized) {
-                    [self savePicAndOpenInstagram: base64Image];
-                }
-            }];
-        }
-    }
-}
-
-RCT_EXPORT_METHOD(shareOnWhatsapp:copy:(NSString *)copy andUrl:(NSString *)url) {
-    if ([[UIApplication sharedApplication] canOpenURL: kAQSWhatsappURLScheme]) {
-        copy = [copy stringByAppendingString:@" "];
-        copy = [copy stringByAppendingString:url];
-        copy = [copy stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
-        NSURL *whatsappURL = [NSURL URLWithString:[NSString stringWithFormat:@"whatsapp://send?text=%@", copy]];
-        [[UIApplication sharedApplication] openURL:whatsappURL options:@{} completionHandler:nil];
-    }
-}
-
-RCT_EXPORT_METHOD(shareOnFacebook:copy:(NSString *)copy andUrl:(NSString *)url) {
-    if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook]) {
-        SLComposeViewController *fbPostSheet = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeFacebook];
-        [fbPostSheet setInitialText:copy];
-        [fbPostSheet addURL:[NSURL URLWithString:url]];
-        UIViewController *rootController = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
-        [rootController presentViewController:twPostSheet animated:YES completion:NULL];
-    }
-}
-
-RCT_EXPORT_METHOD(shareOnTwitter:copy:(NSString *)copy andUrl:(NSString *)url) {
-    if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeTwitter]) {
-        SLComposeViewController *twPostSheet = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeTwitter];
-        [twPostSheet setInitialText:copy];
-        [twPostSheet addURL:[NSURL URLWithString:url]];
-        
-        UIViewController *rootController = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
-        [rootController presentViewController:twPostSheet animated:YES completion:NULL];
-    }
 }
 
 @end
