@@ -8,24 +8,28 @@
 
 #import "RNReactNativeSharingWinstagram.h"
 
-#import "RCTBridge.h"
+#if __has_include("RCTBridgeModule.h")
+#import "RCTBridgeModule.h"
+#else
+#import <React/RCTBridgeModule.h>
+#endif
 #import "AQSInstagramActivity.h"
 #import <Social/Social.h>
 #import <Accounts/Accounts.h>
 @import Photos;
 
-NSString *const kAQSInstagramURLScheme = @"instagram://app";
-NSString *const kAQSWhatsappURLScheme = @"whatsapp://app";
+static NSString *const kAQSInstagramURLScheme = @"instagram://app";
+static NSString *const kAQSWhatsappURLScheme = @"whatsapp://app";
 
 @implementation RNReactNativeSharingWinstagram
 
 @synthesize bridge = _bridge;
 
-RCT_EXPORT_MODULE()
-
 - (dispatch_queue_t)methodQueue {
     return dispatch_get_main_queue();
 }
+
+RCT_EXPORT_MODULE()
 
 - (NSDictionary *)constantsToExport {
     return @{
@@ -38,22 +42,22 @@ RCT_EXPORT_MODULE()
 
 
 RCT_EXPORT_METHOD(share:(NSString *)base64Image copy:(NSString *)copy andUrl:(NSString *)url) {
-    
+
     UIImage *image = [UIImage imageWithData: [[NSData alloc]initWithBase64EncodedString:base64Image options:NSDataBase64DecodingIgnoreUnknownCharacters]];
-    
+
     if (!image) {
         return;
     }
-    
+
     AQSInstagramActivity *activity = [[AQSInstagramActivity alloc] init];
     NSArray *items = @[copy, [[NSURL alloc]initWithString:url], image];
-    
+
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:items applicationActivities:@[activity]];
     activityController.excludedActivityTypes = @[UIActivityTypeAssignToContact, UIActivityTypePrint, UIActivityTypeAddToReadingList, UIActivityTypeCopyToPasteboard, UIActivityTypeOpenInIBooks];
-    
+
     UIViewController *rootController = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
     [rootController presentViewController:activityController animated:YES completion:NULL];
-    
+
 }
 
 RCT_EXPORT_METHOD(shareOnInstagram:(NSString *)base64Image) {
@@ -104,30 +108,30 @@ RCT_EXPORT_METHOD(shareOnTwitter:(NSString *)copy andUrl:(NSString *)url) {
 
 -(void)savePicAndOpenInstagram:(NSString*)base64Image {
     UIImage *image = [UIImage imageWithData: [[NSData alloc]initWithBase64EncodedString:base64Image options:NSDataBase64DecodingIgnoreUnknownCharacters]];
-    
+
     if (!image) {
         return;
     }
-    
+
     NSURL *URL = [self nilOrFileURLWithImageDataTemporary:UIImageJPEGRepresentation(image, 0.9)];
-    
+
     __block PHAssetChangeRequest *_mChangeRequest = nil;
     __block PHObjectPlaceholder *placeholder;
-    
+
     [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-        
+
         NSData *pngData = [NSData dataWithContentsOfURL:URL];
         UIImage *image = [UIImage imageWithData:pngData];
-        
+
         _mChangeRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:image];
-        
+
         placeholder = _mChangeRequest.placeholderForCreatedAsset;
-        
+
     } completionHandler:^(BOOL success, NSError *error) {
-        
+
         if (success) {
             NSURL *instagramURL = [NSURL URLWithString:[NSString stringWithFormat:@"instagram://library?LocalIdentifier=\%@", [placeholder localIdentifier]]];
-            
+
             if ([[UIApplication sharedApplication] canOpenURL:instagramURL]) {
                 [[UIApplication sharedApplication] openURL:instagramURL options:@{} completionHandler:nil];
             }
@@ -145,7 +149,7 @@ RCT_EXPORT_METHOD(shareOnTwitter:(NSString *)copy andUrl:(NSString *)url) {
     if (![data writeToFile:writePath atomically:YES]) {
         return nil;
     }
-    
+
     return [NSURL fileURLWithPath:writePath];
 }
 

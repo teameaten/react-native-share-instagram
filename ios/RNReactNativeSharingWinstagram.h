@@ -6,7 +6,11 @@
 //  Copyright © 2017 nascimentorafael. All rights reserved.
 //
 
-#import "RCTBridge.h"
+#if __has_include("RCTBridgeModule.h")
+#import "RCTBridgeModule.h"
+#else
+#import <React/RCTBridgeModule.h>
+#endif
 
 @import UIKit;
 

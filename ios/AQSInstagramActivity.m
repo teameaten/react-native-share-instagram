@@ -9,7 +9,7 @@
 #import "AQSInstagramActivity.h"
 @import Photos;
 
-NSString *const kAQSInstagramURLScheme = @"instagram://app";
+static NSString *const kAQSInstagramURLScheme = @"instagram://app";
 
 @interface AQSInstagramActivity () <UIDocumentInteractionControllerDelegate>
 
@@ -23,7 +23,7 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
 
 - (void)prepareWithActivityItems:(NSArray *)activityItems {
     [super prepareWithActivityItems:activityItems];
-    
+
     self.activityItems = activityItems;
 }
 
@@ -66,25 +66,25 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
 - (void)savePicAndOpenInstagram {
     UIImage *image = [self nilOrFirstImageFromArray:_activityItems];
     NSURL *URL = [self nilOrFileURLWithImageDataTemporary:UIImageJPEGRepresentation(image, 0.9)];
-    
+
     __block PHAssetChangeRequest *_mChangeRequest = nil;
     __block PHObjectPlaceholder *placeholder;
-    
+
     [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-        
+
         NSData *pngData = [NSData dataWithContentsOfURL:URL];
         UIImage *image = [UIImage imageWithData:pngData];
-        
+
         _mChangeRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:image];
-        
+
         placeholder = _mChangeRequest.placeholderForCreatedAsset;
-        
+
     } completionHandler:^(BOOL success, NSError *error) {
-        
+
         if (success) {
-            
+
             NSURL *instagramURL = [NSURL URLWithString:[NSString stringWithFormat:@"instagram://library?LocalIdentifier=\%@", [placeholder localIdentifier]]];
-            
+
             if ([[UIApplication sharedApplication] canOpenURL:instagramURL]) {
                 [[UIApplication sharedApplication] openURL:instagramURL options:@{} completionHandler:nil];
             }
@@ -103,7 +103,7 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
         [self activityDidFinish:NO];
         return nil;
     }
-    
+
     return [NSURL fileURLWithPath:writePath];
 }
 
