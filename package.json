@@ -1,6 +1,6 @@
 {
   "name": "@micabe/react-native-share-instagram",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Share base64 image on Instagram app (ios and android)",
   "main": "index.js",
   "scripts": {
