@@ -13,7 +13,7 @@
 ```javascript
 import RNReactNativeSharingWinstagram from 'react-native-sharing-winstagram';
 
-RNReactNativeSharingWinstagram.shareWithInstagram(this.state.fileName, this.state.picture, message => {
+RNReactNativeSharingWinstagram.shareWithInstagram(this.state.fileName, this.state.base64EncodeImageString, message => {
   if (message) alert(message)
 }, error => {
   alert(error.message) // error callback for IOs only
@@ -33,3 +33,7 @@ RNReactNativeSharingWinstagram.shareWithInstagram(this.state.fileName, this.stat
 <key>NSPhotoLibraryUsageDescription</key>
 <string>This app requires access to the photo library to share on Instagram.</string>
 ```
+
+### Advanced usage
+
+* You can use the [react-native-fetch-blob](https://github.com/wkh237/react-native-fetch-blob) library to download your remote image and convert it to `.base64()` 
