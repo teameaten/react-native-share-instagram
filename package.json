@@ -12,6 +12,6 @@
   "author": "Mickael Abensur <armouredorange@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
-    "react-native": "^0.46.4",
+    "react-native": "^0.46.4"
   }
 }
