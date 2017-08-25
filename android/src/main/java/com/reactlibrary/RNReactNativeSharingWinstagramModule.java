@@ -124,9 +124,10 @@ public class RNReactNativeSharingWinstagramModule extends ReactContextBaseJavaMo
     }
 
     @ReactMethod
-    public void shareWithInstagram(String fileName, String base64str, Callback callback) {
+    public void shareWithInstagram(String fileName, String base64str, Callback callback, Callback secondCallback) {
        Activity currentActivity = getCurrentActivity();
        this.callback = callback;
+       this.secondCallback = secondCallback;
 
        String type = "image/jpeg";
 
