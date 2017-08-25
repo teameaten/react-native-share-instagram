@@ -1,4 +1,5 @@
 # react-native-share-instagram
+Share your image with the Instagram app using `Intents` (iOS & Android)
 
 ## Getting started
 
@@ -37,3 +38,7 @@ RNReactNativeSharingWinstagram.shareWithInstagram(this.state.fileName, this.stat
 ### Advanced usage
 
 * You can use the [react-native-fetch-blob](https://github.com/wkh237/react-native-fetch-blob) library to download your remote image and convert it to `.base64()`
+
+### Contribution
+
+* Test library to work with windows OS
