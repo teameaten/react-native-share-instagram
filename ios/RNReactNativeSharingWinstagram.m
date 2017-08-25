@@ -1,8 +1,3 @@
-//
-//  Created by Rafael Nascimento on 25/07/17.
-//  Copyright © 2017. All rights reserved.
-//
-
 #import "RNReactNativeSharingWinstagram.h"
 #import "AQSInstagramActivity.h"
 #include "Constants.h"

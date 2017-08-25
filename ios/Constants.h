@@ -1,11 +1,3 @@
-//
-//  Constants.h
-//  RNCustomShare
-//
-//  Created by Rafael Nascimento on 25/07/17.
-//  Copyright © 2017. All rights reserved.
-//
-
 #ifndef Constants_h
 #define Constants_h
 
