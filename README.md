@@ -1,33 +1,35 @@
-
-# react-native-sharing-winstagram
+# react-native-share-instagram
 
 ## Getting started
 
-`$ npm install react-native-sharing-winstagram --save`
+`$ yarn add @micabe/react-native-share-instagram`
 
-### Mostly automatic installation
+## Automatic installation
 
-`$ react-native link react-native-sharing-winstagram`
+`$ react-native link @micabe/react-native-share-instagram`
 
-### Manual installation
-
-
-#### iOS
-
-1. In XCode, in the project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
-2. Go to `node_modules` ➜ `react-native-sharing-winstagram` and add `RNReactNativeSharingWinstagram.xcodeproj`
-3. In XCode, in the project navigator, select your project. Add `libRNReactNativeSharingWinstagram.a` to your project's `Build Phases` ➜ `Link Binary With Libraries`
-4. Run your project (`Cmd+R`)<
-
-#### Android
-
-To be implemented.
 
 ## Usage
 ```javascript
 import RNReactNativeSharingWinstagram from 'react-native-sharing-winstagram';
 
-RNReactNativeSharingWinstagram.shareImage(base64Str, text, url);
+RNReactNativeSharingWinstagram.shareWithInstagram(this.state.fileName, this.state.picture, message => {
+  if (message) alert(message)
+}, error => {
+  alert(error.message) // error callback for IOs only
+})
+```
 
- 'https://github.com/nascimentorafael/react-native-sharing-winstagram');
+### Troubleshouting
+
+* Make sure you have authorised in `Info.plist` your app to communicate with the Instagram app (iOS):
+
+```xml
+<key>LSApplicationQueriesSchemes</key>
+<array>
+  <string>instagram</string>
+</array>
+
+<key>NSPhotoLibraryUsageDescription</key>
+<string>This app requires access to the photo library to share on Instagram.</string>
 ```

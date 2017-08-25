@@ -1,7 +1,7 @@
 {
-  "name": "react-native-sharing-winstagram",
-  "version": "1.0.8",
-  "description": "",
+  "name": "@micabe/react-native-share-instagram",
+  "version": "1.0.0",
+  "description": "Share base64 image on Instagram app (ios and android)",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,10 +9,9 @@
   "keywords": [
     "react-native"
   ],
-  "author": "",
-  "license": "",
+  "author": "Mickael Abensur <armouredorange@gmail.com>",
+  "license": "MIT",
   "peerDependencies": {
-    "react-native": "^0.41.2",
-    "react-native-windows": "0.41.0-rc.1"
+    "react-native": "^0.46.4",
   }
 }
